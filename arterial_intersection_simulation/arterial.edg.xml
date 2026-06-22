@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edges>
+    <!-- Main arterial road — left to right -->
+    <edge id="start_J1" from="start" to="J1" numLanes="2" speed="13.89"/>
+    <edge id="J1_J2"    from="J1"    to="J2" numLanes="2" speed="13.89"/>
+    <edge id="J2_J3"    from="J2"    to="J3" numLanes="2" speed="13.89"/>
+    <edge id="J3_J4"    from="J3"    to="J4" numLanes="2" speed="13.89"/>
+    <edge id="J4_end"   from="J4"    to="end" numLanes="2" speed="13.89"/>
+
+    <!-- Main arterial road — right to left -->
+    <edge id="end_J4"   from="end"   to="J4" numLanes="2" speed="13.89"/>
+    <edge id="J4_J3"    from="J4"    to="J3" numLanes="2" speed="13.89"/>
+    <edge id="J3_J2"    from="J3"    to="J2" numLanes="2" speed="13.89"/>
+    <edge id="J2_J1"    from="J2"    to="J1" numLanes="2" speed="13.89"/>
+    <edge id="J1_start" from="J1"    to="start" numLanes="2" speed="13.89"/>
+
+    <!-- Side roads J1 -->
+    <edge id="J1N_J1" from="J1N" to="J1" numLanes="1" speed="8.33"/>
+    <edge id="J1_J1N" from="J1"  to="J1N" numLanes="1" speed="8.33"/>
+    <edge id="J1S_J1" from="J1S" to="J1" numLanes="1" speed="8.33"/>
+    <edge id="J1_J1S" from="J1"  to="J1S" numLanes="1" speed="8.33"/>
+
+    <!-- Side roads J2 -->
+    <edge id="J2N_J2" from="J2N" to="J2" numLanes="1" speed="8.33"/>
+    <edge id="J2_J2N" from="J2"  to="J2N" numLanes="1" speed="8.33"/>
+    <edge id="J2S_J2" from="J2S" to="J2" numLanes="1" speed="8.33"/>
+    <edge id="J2_J2S" from="J2"  to="J2S" numLanes="1" speed="8.33"/>
+
+    <!-- Side roads J3 -->
+    <edge id="J3N_J3" from="J3N" to="J3" numLanes="1" speed="8.33"/>
+    <edge id="J3_J3N" from="J3"  to="J3N" numLanes="1" speed="8.33"/>
+    <edge id="J3S_J3" from="J3S" to="J3" numLanes="1" speed="8.33"/>
+    <edge id="J3_J3S" from="J3"  to="J3S" numLanes="1" speed="8.33"/>
+
+    <!-- Side roads J4 -->
+    <edge id="J4N_J4" from="J4N" to="J4" numLanes="1" speed="8.33"/>
+    <edge id="J4_J4N" from="J4"  to="J4N" numLanes="1" speed="8.33"/>
+    <edge id="J4S_J4" from="J4S" to="J4" numLanes="1" speed="8.33"/>
+    <edge id="J4_J4S" from="J4"  to="J4S" numLanes="1" speed="8.33"/>
+</edges>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2026-02-22T21:10:59.007852+05:30 by Eclipse SUMO netedit 1.25.0
+-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <!-- VTypes -->
+    <vType id="DEFAULT_VEHTYPE" length="5.00" maxSpeed="13.90" accel="2.6" decel="4.5"/>
+    <vType id="emergency" maxSpeed="25.00" vClass="emergency" color="red" accel="3.0"/>
+    <!-- Routes -->
+    <route id="E_to_N" edges="east_in north_out"/>
+    <route id="E_to_S" edges="east_in south_out"/>
+    <route id="E_to_W" edges="east_in west_out"/>
+    <route id="N_to_E" edges="north_in east_out"/>
+    <route id="N_to_S" edges="north_in south_out"/>
+    <route id="N_to_W" edges="north_in west_out"/>
+    <route id="S_to_E" edges="south_in east_out"/>
+    <route id="S_to_N" edges="south_in north_out"/>
+    <route id="S_to_W" edges="south_in west_out"/>
+    <route id="W_to_E" edges="west_in east_out"/>
+    <route id="W_to_N" edges="west_in north_out"/>
+    <route id="W_to_S" edges="west_in south_out"/>
+    <!-- Vehicles, persons and containers (sorted by depart) -->
+    <flow id="flow_EN" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="E_to_N"/>
+    <flow id="flow_ES" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="E_to_S"/>
+    <flow id="flow_EW" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="E_to_W"/>
+    <flow id="flow_NE" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="N_to_E"/>
+    <flow id="flow_NS" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="N_to_S"/>
+    <flow id="flow_NW" begin="0.00" end="3600.00" perHour="500.00" route="N_to_W"/>
+    <flow id="flow_SE" begin="0.00" end="3600.00" perHour="500.00" route="S_to_E"/>
+    <flow id="flow_SN" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="S_to_N"/>
+    <flow id="flow_SW" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="S_to_W"/>
+    <flow id="flow_WE" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="W_to_E"/>
+    <flow id="flow_WN" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="W_to_N"/>
+    <flow id="flow_WS" begin="0.00" end="3600.00" perHour="500.00" route="W_to_S"/>
+</routes>

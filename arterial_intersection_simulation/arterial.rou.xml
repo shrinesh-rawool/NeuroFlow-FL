@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+    <!-- Vehicle type definitions -->
+    <vType id="car"       accel="2.6" decel="4.5" length="5" maxSpeed="13.89" sigma="0.5"/>
+    <vType id="emergency" accel="2.6" decel="4.5" length="6" maxSpeed="16.67"
+           sigma="0.5" color="1,0,0" guiShape="emergency"/>
+
+    <!-- Main arterial flows — left to right and right to left -->
+    <flow id="main_LR" type="car" from="start_J1" to="J4_end"
+          begin="0" end="3600" vehsPerHour="400" departLane="best"/>
+    <flow id="main_RL" type="car" from="end_J4"   to="J1_start"
+          begin="0" end="3600" vehsPerHour="400" departLane="best"/>
+
+    <!-- Side road flows at each intersection -->
+    <flow id="side_J1N" type="car" from="J1N_J1" to="J1_J2"
+          begin="0" end="3600" vehsPerHour="150" departLane="best"/>
+    <flow id="side_J1S" type="car" from="J1S_J1" to="J1_J2"
+          begin="0" end="3600" vehsPerHour="150" departLane="best"/>
+    <flow id="side_J2N" type="car" from="J2N_J2" to="J2_J3"
+          begin="0" end="3600" vehsPerHour="150" departLane="best"/>
+    <flow id="side_J2S" type="car" from="J2S_J2" to="J2_J3"
+          begin="0" end="3600" vehsPerHour="150" departLane="best"/>
+    <flow id="side_J3N" type="car" from="J3N_J3" to="J3_J4"
+          begin="0" end="3600" vehsPerHour="150" departLane="best"/>
+    <flow id="side_J3S" type="car" from="J3S_J3" to="J3_J4"
+          begin="0" end="3600" vehsPerHour="150" departLane="best"/>
+    <flow id="side_J4N" type="car" from="J4N_J4" to="J4_end"
+          begin="0" end="3600" vehsPerHour="150" departLane="best"/>
+    <flow id="side_J4S" type="car" from="J4S_J4" to="J4_end"
+          begin="0" end="3600" vehsPerHour="150" departLane="best"/>
+
+    <!-- Emergency vehicle — travels full arterial once per hour -->
+    <flow id="emergency_LR" type="emergency" from="start_J1" to="J4_end"
+          begin="600" end="3600" vehsPerHour="2" departLane="best"/>
+</routes>

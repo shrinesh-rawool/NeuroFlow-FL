@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <input>
+        <net-file   value="arterial.net.xml"/>
+        <route-files value="arterial.rou.xml"/>
+    </input>
+    <time>
+        <begin value="0"/>
+        <end   value="3600"/>
+    </time>
+    <processing>
+        <time-to-teleport value="-1"/>
+    </processing>
+</configuration>

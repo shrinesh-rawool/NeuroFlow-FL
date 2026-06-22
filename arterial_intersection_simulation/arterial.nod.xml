@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodes>
+    <!-- 4 main arterial intersections, spaced 300m apart -->
+    <node id="J1" x="0"    y="0" type="traffic_light"/>
+    <node id="J2" x="300"  y="0" type="traffic_light"/>
+    <node id="J3" x="600"  y="0" type="traffic_light"/>
+    <node id="J4" x="900"  y="0" type="traffic_light"/>
+
+    <!-- Entry/exit nodes for the main arterial road -->
+    <node id="start" x="-200" y="0" type="priority"/>
+    <node id="end"   x="1100" y="0" type="priority"/>
+
+    <!-- Side road nodes for each intersection (north and south) -->
+    <node id="J1N" x="0"   y="200"  type="priority"/>
+    <node id="J1S" x="0"   y="-200" type="priority"/>
+    <node id="J2N" x="300" y="200"  type="priority"/>
+    <node id="J2S" x="300" y="-200" type="priority"/>
+    <node id="J3N" x="600" y="200"  type="priority"/>
+    <node id="J3S" x="600" y="-200" type="priority"/>
+    <node id="J4N" x="900" y="200"  type="priority"/>
+    <node id="J4S" x="900" y="-200" type="priority"/>
+</nodes>
