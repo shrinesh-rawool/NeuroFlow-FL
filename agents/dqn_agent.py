@@ -11,16 +11,16 @@ def create_dqn(env, log_dir="results/logs/default"):
     model = DQN(
         "MlpPolicy",
         env,
-        learning_rate=0.0003,
-        buffer_size=50000,
-        learning_starts=5000,          # was 1000 — wait for buffer to fill ~10% before training
-        batch_size=64,
-        gamma=0.99,
-        train_freq=4,
-        target_update_interval=1000,
-        exploration_fraction=0.3,      # decay epsilon over first 30% of total timesteps
-        exploration_final_eps=0.05,    # settle at 5% random action after decay
-        verbose=1,
+        learning_rate=0.0003,           # size of weight update step
+        buffer_size=50000,              # size of replay buffer (how many past experiences to store)
+        learning_starts=5000,           # was 1000 — wait for buffer to fill ~10% before training
+        batch_size=64,                  # number of random samples per training step
+        gamma=0.99,                     # how much to value future rewarch vs. intermediate reward (0.99 = 1% discount per step)
+        train_freq=4,                   # train the network every 4 environment step
+        target_update_interval=1000,    # number of steps to sync the network
+        exploration_fraction=0.3,       # decay epsilon over first 30% of total timesteps
+        exploration_final_eps=0.05,     # settle at 5% random action after decay
+        verbose=1,                      
         device=device,
         tensorboard_log="results/logs/"
     )
