@@ -1,0 +1,26 @@
+{
+  "name": "NeuroFlow-FL Dev Environment",
+  "build": {
+    "dockerfile": "Dockerfile.dev"
+  },
+  "workspaceFolder": "/app",
+
+  // Mounts your project folder into the container automatically
+  "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+
+  // Handy VS Code extensions inside the container
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ]
+    }
+  },
+
+  // Expose TensorBoard's default port to your host machine
+  "forwardPorts": [6006],
+
+  // Keeps the container attached to the terminal properly
+  "remoteUser": "root"
+}
