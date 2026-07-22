@@ -1,0 +1,28 @@
+FROM python:3.11-slim
+
+# System dependencies SUMO and some Python packages need
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 \
+    git \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Core project dependencies
+RUN pip install --no-cache-dir \
+    eclipse-sumo \
+    traci \
+    gymnasium \
+    stable-baselines3 \
+    torch --index-url https://download.pytorch.org/whl/cpu \
+    flwr \
+    numpy \
+    pandas \
+    matplotlib \
+    seaborn \
+    tensorboard \
+    os
+
+WORKDIR /app
+
+# Keep the container running so VS Code / docker exec can attach to it
+CMD ["sleep", "infinity"]
