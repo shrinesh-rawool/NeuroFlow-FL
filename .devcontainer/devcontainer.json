@@ -1,5 +1,5 @@
 {
-  "name": "NeuroFlow-FL Dev Environment",
+  "name": "NeuroFlow-FL Dev Environment docker",
   "build": {
     "dockerfile": "Dockerfile.dev"
   },

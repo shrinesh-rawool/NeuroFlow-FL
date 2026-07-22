@@ -19,7 +19,8 @@ RUN pip install --no-cache-dir \
     pandas \
     matplotlib \
     seaborn \
-    tensorboard
+    tensorboard \
+    os
 
 WORKDIR /app
 
