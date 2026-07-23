@@ -5,7 +5,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     git \
     build-essential \
-    && rm -rf /var/lib/apt/lists/*
+    openssh-client && \
+    rm -rf /var/lib/apt/lists/*
 
 # Everything EXCEPT torch, from normal PyPI
 RUN pip install --no-cache-dir \

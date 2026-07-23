@@ -7,8 +7,10 @@
   "workspaceFolder": "/app",
   "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
   "runArgs": [
-    "--runtime=nvidia",
-    "--gpus=all"
+      "--runtime=nvidia",
+      "--gpus=all",
+      "-v",
+      "${localEnv:HOME}/.ssh:/root/.ssh:ro"
   ],
   "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
   "forwardPorts": [6006],
