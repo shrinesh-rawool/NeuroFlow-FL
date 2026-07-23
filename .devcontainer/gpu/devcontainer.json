@@ -1,7 +1,7 @@
 {
   "name": "NeuroFlow-FL (GPU)",
   "build": {
-    "dockerfile": "../../Dockerfile.dev",
+    "dockerfile": "../Dockerfile.dev",
     "target": "gpu"
   },
   "workspaceFolder": "/app",

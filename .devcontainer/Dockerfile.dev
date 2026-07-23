@@ -18,6 +18,7 @@ RUN pip install --no-cache-dir \
     pandas \
     matplotlib \
     seaborn \
+    stable_baselines3 \
     tensorboard
 
 WORKDIR /app
@@ -25,11 +26,11 @@ WORKDIR /app
 # ---- CPU target: use on Arch/Windows without GPU passthrough set up ----
 FROM base AS cpu
 # Torch disabled for fast debug builds — uncomment when ready
-# RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+RUN pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 CMD ["sleep", "infinity"]
 
 # ---- GPU target: use on your rig once NVIDIA Container Toolkit is set up ----
 FROM base AS gpu
 # Torch disabled for fast debug builds — uncomment when ready
-# RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cu121
+RUN pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu132
 CMD ["sleep", "infinity"]
