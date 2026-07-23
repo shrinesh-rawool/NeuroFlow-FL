@@ -1,28 +1,34 @@
-FROM python:3.11-slim
+# ---- Base stage: everything except torch ----
+FROM python:3.11-slim AS base
 
-# System dependencies SUMO and some Python packages need
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     git \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Core project dependencies
+# Everything EXCEPT torch, from normal PyPI
 RUN pip install --no-cache-dir \
     eclipse-sumo \
     traci \
     gymnasium \
-    stable-baselines3 \
-    torch --index-url https://download.pytorch.org/whl/cpu \
     flwr \
     numpy \
     pandas \
     matplotlib \
     seaborn \
-    tensorboard \
-    os
+    tensorboard
 
 WORKDIR /app
 
-# Keep the container running so VS Code / docker exec can attach to it
+# ---- CPU target: use on Arch/Windows without GPU passthrough set up ----
+FROM base AS cpu
+# Torch disabled for fast debug builds — uncomment when ready
+# RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+CMD ["sleep", "infinity"]
+
+# ---- GPU target: use on your rig once NVIDIA Container Toolkit is set up ----
+FROM base AS gpu
+# Torch disabled for fast debug builds — uncomment when ready
+# RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cu121
 CMD ["sleep", "infinity"]

@@ -1,0 +1,16 @@
+{
+  "name": "NeuroFlow-FL (GPU)",
+  "build": {
+    "dockerfile": "../../Dockerfile.dev",
+    "target": "gpu"
+  },
+  "workspaceFolder": "/app",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+  "runArgs": [
+    "--runtime=nvidia",
+    "--gpus=all"
+  ],
+  "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+  "forwardPorts": [6006],
+  "remoteUser": "root"
+}
