@@ -29,16 +29,16 @@
     <route id="W_to_N" edges="west_in north_out"/>
     <route id="W_to_S" edges="west_in south_out"/>
     <!-- Vehicles, persons and containers (sorted by depart) -->
-    <flow id="flow_EN" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="E_to_N"/>
-    <flow id="flow_ES" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="E_to_S"/>
-    <flow id="flow_EW" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="E_to_W"/>
-    <flow id="flow_NE" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="N_to_E"/>
-    <flow id="flow_NS" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="N_to_S"/>
+    <flow id="flow_EN" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="E_to_N"/>
+    <flow id="flow_ES" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="E_to_S"/>
+    <flow id="flow_EW" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="E_to_W"/>
+    <flow id="flow_NE" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="N_to_E"/>
+    <flow id="flow_NS" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="N_to_S"/>
     <flow id="flow_NW" begin="0.00" end="3600.00" perHour="500.00" route="N_to_W"/>
     <flow id="flow_SE" begin="0.00" end="3600.00" perHour="500.00" route="S_to_E"/>
-    <flow id="flow_SN" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="S_to_N"/>
-    <flow id="flow_SW" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="S_to_W"/>
-    <flow id="flow_WE" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="W_to_E"/>
-    <flow id="flow_WN" type="DEFAULT_VEHTYPE" begin="0.00" end="3600.00" perHour="500.00" route="W_to_N"/>
+    <flow id="flow_SN" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="S_to_N"/>
+    <flow id="flow_SW" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="S_to_W"/>
+    <flow id="flow_WE" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="W_to_E"/>
+    <flow id="flow_WN" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="W_to_N"/>
     <flow id="flow_WS" begin="0.00" end="3600.00" perHour="500.00" route="W_to_S"/>
 </routes>
