@@ -5,7 +5,15 @@
 
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
     <!-- VTypes -->
-    <vType id="DEFAULT_VEHTYPE" length="5.00" maxSpeed="13.90" accel="2.6" decel="4.5"/>
+    <!-- Probabilistic vehicle selection -->
+    <vTypeDistribution id="indian_mixed_traffic">
+            <vType id="car" vClass="passenger" length="5.0" maxSpeed="13.9" accel="2.6" decel="4.5" probability="0.60"/>
+            <vType id="twowheeler" vClass="motorcycle" length="2.2" maxSpeed="16.7" accel="3.5" decel="5.0" probability="0.22"/>
+            <vType id="autorickshaw" vClass="passenger" length="3.2" maxSpeed="11.0" accel="1.8" decel="4.0" probability="0.08"/>
+            <vType id="bus" vClass="bus" length="10.5" maxSpeed="11.1" accel="1.2" decel="3.5" probability="0.06"/>
+            <vType id="truck" vClass="truck" length="8.0" maxSpeed="11.1" accel="1.0" decel="3.5" probability="0.04"/>
+        </vTypeDistribution>
+
     <vType id="emergency" maxSpeed="25.00" vClass="emergency" color="red" accel="3.0"/>
     <!-- Routes -->
     <route id="E_to_N" edges="east_in north_out"/>
