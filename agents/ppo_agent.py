@@ -1,6 +1,7 @@
-# agents/ppo_agent.py
+# agents/ppo_agent.py  # noqa: EXE002
 
 import os
+
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback
 
@@ -19,7 +20,7 @@ def create_ppo(env):
         clip_range=0.2,
         ent_coef=0.01,
         verbose=1,
-        tensorboard_log="results/logs/PPO"
+        tensorboard_log="results/logs/PPO",
     )
 
     return model
