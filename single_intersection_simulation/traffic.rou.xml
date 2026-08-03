@@ -34,11 +34,11 @@
     <flow id="flow_EW" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="E_to_W"/>
     <flow id="flow_NE" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="N_to_E"/>
     <flow id="flow_NS" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="N_to_S"/>
-    <flow id="flow_NW" begin="0.00" end="3600.00" perHour="500.00" route="N_to_W"/>
-    <flow id="flow_SE" begin="0.00" end="3600.00" perHour="500.00" route="S_to_E"/>
+    <flow id="flow_NW" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="N_to_W"/>
+    <flow id="flow_SE" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="S_to_E"/>
     <flow id="flow_SN" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="S_to_N"/>
     <flow id="flow_SW" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="S_to_W"/>
     <flow id="flow_WE" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="W_to_E"/>
     <flow id="flow_WN" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="W_to_N"/>
-    <flow id="flow_WS" begin="0.00" end="3600.00" perHour="500.00" route="W_to_S"/>
+    <flow id="flow_WS" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="W_to_S"/>
 </routes>
