@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 
+
 def write_route_file(rates, input_path, output_path):
     tree = ET.parse(input_path)
     root = tree.getroot()

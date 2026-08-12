@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def generate_route_rates(seed, baseline_rate=500.0, noise_pct=0.15):
     """
     Returns a dict of flow_id -> perturbed perHour value,
