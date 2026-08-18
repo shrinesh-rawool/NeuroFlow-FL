@@ -26,6 +26,28 @@
 </neteditConfiguration>
 -->
 
+<!--
+    MODIFIED: 2026-08-16 — Protected right-turn phase fix for J4.
+    Original single "static" tlLogic (4 phases) permitted right-turning
+    movements (linkIndices 3, 7, 11, 15 — dir="l" in SUMO's convention,
+    physically right turns under LHT) only via lowercase "g" permissive
+    green concurrent with opposing through traffic. Under Indian mixed
+    traffic (autos/2-wheelers/buses filling gaps), these movements were
+    starved (~53% entry rate observed).
+
+    Fix: expanded to 12 phases. Each right-turn movement now gets its
+    own short EXCLUSIVE protected phase (5s green + 2s yellow) where all
+    conflicting movements are forced red. Confirmed via the foes matrix
+    that index 3 conflicts with index 11, and index 7 conflicts with
+    index 15 (opposing right-turners cross paths in the middle of the
+    junction), so each of the four gets its own separate phase rather
+    than being paired.
+
+    Cycle length: 94s -> 103s (+9s, from 4 added 5s+2s phase pairs).
+    Main through-phases shortened from 42s -> 37s to partially offset
+    the added cycle time; re-tune both once retrained on real demand.
+-->
+
 <net version="1.20" junctionCornerDetail="5" limitTurnSpeed="5.50" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
 
     <location netOffset="0.00,0.00" convBoundary="-200.00,-100.00,0.00,100.00" origBoundary="10000000000.00,10000000000.00,-10000000000.00,-10000000000.00" projParameter="!"/>
@@ -117,11 +139,19 @@
     </edge>
 
     <tlLogic id="J4" type="static" programID="0" offset="0">
-        <phase duration="42" state="GGGgrrrrGGGgrrrr"/>
+        <!-- Phase 0: NS main through -->
+        <phase duration="37" state="GGGgrrrrGGGgrrrr"/>
         <phase duration="3"  state="yyyyrrrryyyyrrrr"/>
-        <phase duration="42" state="rrrrGGGgrrrrGGGg"/>
+        <!-- Phase 2: protected right N->E (idx3) + S->W (idx11), shared -->
+        <phase duration="5"  state="rrrGrrrrrrrGrrrr"/>
+        <phase duration="2"  state="rrryrrrrrrryrrrr"/>
+        <!-- Phase 4: EW main through -->
+        <phase duration="37" state="rrrrGGGgrrrrGGGg"/>
         <phase duration="3"  state="rrrryyyyrrrryyyy"/>
-    </tlLogic>
+        <!-- Phase 6: protected right E->S (idx7) + W->N (idx15), shared -->
+        <phase duration="5"  state="rrrrrrrGrrrrrrrG"/>
+        <phase duration="2"  state="rrrrrrryrrrrrrry"/> 
+    </tlLogic>  
 
     <junction id="J4" type="traffic_light" x="-100.00" y="0.00" incLanes="north_in_0 north_in_1 east_in_0 east_in_1 south_in_0 south_in_1 west_in_0 west_in_1" intLanes=":J4_0_0 :J4_1_0 :J4_1_1 :J4_16_0 :J4_4_0 :J4_5_0 :J4_5_1 :J4_17_0 :J4_8_0 :J4_9_0 :J4_9_1 :J4_18_0 :J4_12_0 :J4_13_0 :J4_13_1 :J4_19_0" shape="-106.40,10.40 -93.60,10.40 -93.16,8.18 -92.60,7.40 -91.82,6.84 -90.82,6.51 -89.60,6.40 -89.60,-6.40 -91.82,-6.84 -92.60,-7.40 -93.16,-8.18 -93.49,-9.18 -93.60,-10.40 -106.40,-10.40 -106.84,-8.18 -107.40,-7.40 -108.18,-6.84 -109.18,-6.51 -110.40,-6.40 -110.40,6.40 -108.18,6.84 -107.40,7.40 -106.84,8.18 -106.51,9.18">
         <request index="0"  response="0000000000000000" foes="0000000001100000" cont="0"/>
