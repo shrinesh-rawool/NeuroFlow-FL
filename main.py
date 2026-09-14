@@ -1,18 +1,18 @@
 from env.traffic_env import TrafficEnv
-from agents.ppo_agent import train_ppo
+from agents.dqn_agent import train_dqn
 
 
 def train():
 
     # Training environment
-    env = TrafficEnv("network/simulation.sumocfg")
+    env = TrafficEnv("single_intersection_simulation/simulation.sumocfg")
 
     # Separate evaluation environment — required by EvalCallback in train_dqn()
     # Must be a different instance so evaluation episodes do not interfere
     # with the training environment's state
     eval_env = TrafficEnv("network/simulation.sumocfg")
 
-    model = train_ppo(env, eval_env, timesteps=200_000)
+    model = train_dqn(env, eval_env, timesteps=200_000)
 
     env.close()
     eval_env.close()
@@ -25,7 +25,7 @@ def run_with_preemption(model):
     # Emergency preemption is now handled inside TrafficEnv.step() automatically.
     # There is no need to manage it separately here — the env checks for
     # emergency vehicles and overrides the agent's action on every step.
-    env = TrafficEnv("network/simulation.sumocfg")
+    env = TrafficEnv("single_intersection_simulation/simulation.sumocfg")
 
     state, _ = env.reset()
 
@@ -44,12 +44,8 @@ def run_with_preemption(model):
 
 if __name__ == "__main__":
 
-    print("Training PPO agent...")
+    print("Training dqn agent...")
     model = train()
 
-    print("Running simulation with trained PPO agent...")
+    print("Running simulation with trained DQN agent...")
     run_with_preemption(model)
-    
-    
-    
-    
