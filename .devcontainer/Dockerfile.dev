@@ -1,24 +1,26 @@
-# ---- Base stage: everything except torch ----
+# ---- Base stage: system utilities + python packages ----
 FROM python:3.11-slim AS base
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1 \
+    curl \
+    wget \
+    tar \
+    gzip \
+    procps \
     git \
     build-essential \
     openssh-client \
+    libgl1 \
     libxrender1 \
     libxext6 \
-    libsm6 && \
-    rm -rf /var/lib/apt/lists/*
+    libsm6 \
+    && rm -rf /var/lib/apt/lists/*
 
-# SUMO wheel is large (~150MB) — install separately so a flaky connection
-# doesn't force re-downloading the smaller packages on retry
-RUN pip install --no-cache-dir --timeout 300 --retries 5 eclipse-sumo
+# Large dependency installed separately
+RUN pip install --no-cache-dir --default-timeout=1000 --retries 10 eclipse-sumo
 
-# Everything else EXCEPT torch, from normal PyPI.
-# --no-deps on stable_baselines3 prevents it from silently pulling in an
-# unconstrained torch install (with the full CUDA toolkit) before the
-# cpu/gpu stage gets a chance to install the correct scoped version.
-RUN pip install --no-cache-dir --timeout 300 --retries 5 \
+# Python dependencies
+RUN pip install --no-cache-dir --default-timeout=1000 --retries 10 \
     traci \
     gymnasium \
     flwr \
@@ -29,16 +31,16 @@ RUN pip install --no-cache-dir --timeout 300 --retries 5 \
     tensorboard \
     cloudpickle \
     "gymnasium[other]" && \
-    pip install --no-cache-dir --timeout 300 --retries 5 --no-deps stable_baselines3
+    pip install --no-cache-dir --default-timeout=1000 --retries 10 --no-deps stable_baselines3
 
 WORKDIR /app
 
-# ---- CPU target: use on Arch/Windows without GPU passthrough set up ----
+# ---- CPU target ----
 FROM base AS cpu
-RUN pip3 install --no-cache-dir --timeout 300 --retries 5 torch torchvision --index-url https://download.pytorch.org/whl/cpu
+RUN pip3 install --no-cache-dir --default-timeout=1000 --retries 10 torch torchvision --index-url https://download.pytorch.org/whl/cpu
 CMD ["sleep", "infinity"]
 
-# ---- GPU target: use on rig once NVIDIA Container Toolkit is set up ----
+# ---- GPU target ----
 FROM base AS gpu
-RUN pip3 install --no-cache-dir --timeout 300 --retries 5 torch torchvision --index-url https://download.pytorch.org/whl/cu132
+RUN pip3 install --no-cache-dir --default-timeout=1000 --retries 10 torch torchvision --index-url https://download.pytorch.org/whl/cu132
 CMD ["sleep", "infinity"]
