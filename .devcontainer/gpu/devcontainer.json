@@ -2,17 +2,18 @@
   "name": "NeuroFlow-FL (GPU)",
   "build": {
     "dockerfile": "../Dockerfile.dev",
+    "context": "../..",
     "target": "gpu"
   },
   "workspaceFolder": "/app",
   "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+  "overrideCommand": false,
   "runArgs": [
-      "--runtime=nvidia",
-      "--gpus=all",
-      "-v",
-      "${localEnv:HOME}/.ssh:/root/.ssh:ro"
+    "--gpus=all",
+    "-v",
+    "${localEnv:HOME}/.ssh:/root/.ssh:ro"
   ],
-  "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+  "postStartCommand": "git config --global --add safe.directory /app || true",
   "forwardPorts": [6006],
   "remoteUser": "root"
 }
