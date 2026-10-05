@@ -219,7 +219,7 @@ class IntersectionController:
             - QUEUE_WEIGHT * total_queue
             - EMERGENCY_WEIGHT * emergency_wait
         )
-        return float(np.clip(reward, -100, 0))
+        return float(np.clip(reward, -5000, 0))
 
     # ---- validation ------------------------------------------------------
 
