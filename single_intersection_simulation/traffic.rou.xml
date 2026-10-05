@@ -41,4 +41,5 @@
     <flow id="flow_WE" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="W_to_E"/>
     <flow id="flow_WN" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="W_to_N"/>
     <flow id="flow_WS" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="500.00" route="W_to_S"/>
+    <vehicle id="emg_test" type="emergency" route="N_to_S" depart="100.00"/>
 </routes>

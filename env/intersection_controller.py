@@ -25,25 +25,20 @@ the binary action space's meaning unambiguous while supporting >2 greens.
 If/when a Discrete(4) direct-phase-selection action space is added for
 comparison, it can call advance_to(target_phase) instead of advance().
 
-REWARD WEIGHTING — two independent mechanisms, kept deliberately separate:
+REWARD WEIGHTING — one unified weighted sum, two weight sources:
 
-1. Ordinary-traffic length weighting: non-emergency vehicles are weighted
-   by physical length relative to a car (length already present in the
-   .rou.xml vType definitions — no external citation needed). This ties
-   the penalty to road-space / clearance-time cost, read live via
-   traci.vehicle.getLength().
+Every vehicle's waiting time is weighted and summed in a single formula.
+Ordinary vehicles get a weight derived from physical length relative to a
+car (length already present in the .rou.xml vType definitions — no
+external citation needed), read live via traci.vehicle.getLength(). This
+ties the penalty to road-space / clearance-time cost.
 
-2. Emergency priority: emergency vehicles are EXCLUDED from the
-   length-weighted sum and instead penalized through a separate,
-   independently-tunable term (their waiting time x a flat priority
-   coefficient). This is deliberate — an emergency vehicle's cost is
-   categorically different (life-safety / response-time), not a function
-   of its physical size, so conflating the two into one multiplicative
-   weight would be incoherent (a bulkier ambulance would otherwise be
-   weighted arbitrarily higher than a smaller one for no principled
-   reason). Keeping them as separate additive terms lets each be
-   motivated and tuned independently, mirroring the original reward
-   structure's two-term design.
+Emergency vehicles get a flat, length-independent weight instead — their
+priority comes from being an emergency vehicle, not from their physical
+size, so length plays no role in their weight (a bulkier ambulance isn't
+weighted any differently than a smaller one). This is a bias applied on
+top of the same unified sum, not a separate additive term with its own
+coefficient — simpler than keeping two parallel formulas.
 """
 
 import traci
@@ -224,7 +219,7 @@ class IntersectionController:
             - QUEUE_WEIGHT * total_queue
             - EMERGENCY_WEIGHT * emergency_wait
         )
-        return float(np.clip(reward, -100, 0))
+        return float(np.clip(reward, -5000, 0))
 
     # ---- validation ------------------------------------------------------
 
