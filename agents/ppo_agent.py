@@ -2,10 +2,11 @@ import os
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback
 
-def create_ppo(env, run_name="ppo_default"):
+def create_ppo(env, run_name="ppo_default", seed=None):
     model = PPO(
         "MlpPolicy",
         env,
+        device="cpu",
         learning_rate=0.0003,
         n_steps=2048,
         batch_size=64,
@@ -15,18 +16,19 @@ def create_ppo(env, run_name="ppo_default"):
         clip_range=0.2,
         ent_coef=0.01,
         verbose=1,
-        tensorboard_log=f"results/logs/{run_name}/",
+        seed=seed,
+        tensorboard_log=f"results/logs/{run_name}/"
     )
     return model
 
-def train_ppo(env, eval_env, timesteps=200000, run_name="ppo_default"):
-    model = create_ppo(env, run_name=run_name)
+def train_ppo(env, eval_env, timesteps=200000, run_name="ppo_default", seed=None, eval_freq=10_000):
+    model = create_ppo(env, run_name=run_name, seed=seed)
 
     eval_callback = EvalCallback(
         eval_env,
         best_model_save_path=f"results/models/{run_name}/best/",
         log_path=f"results/logs/{run_name}/eval/",
-        eval_freq=10_000,
+        eval_freq=eval_freq,
         n_eval_episodes=3,
         deterministic=True,
         render=False,
