@@ -25,17 +25,17 @@
     <route id="W_to_N" edges="west_in north_out" />
     <route id="W_to_S" edges="west_in south_out" />
     
-    <flow id="flow_EN" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="503.21" route="E_to_N" />
-    <flow id="flow_ES" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="515.58" route="E_to_S" />
-    <flow id="flow_EW" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="495.64" route="E_to_W" />
-    <flow id="flow_NE" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="455.49" route="N_to_E" />
-    <flow id="flow_NS" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="504.31" route="N_to_S" />
-    <flow id="flow_NW" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="453.66" route="N_to_W" />
-    <flow id="flow_SE" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="467.23" route="S_to_E" />
-    <flow id="flow_SN" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="538.05" route="S_to_N" />
-    <flow id="flow_SW" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="507.75" route="S_to_W" />
-    <flow id="flow_WE" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="554.56" route="W_to_E" />
-    <flow id="flow_WN" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="545.81" route="W_to_N" />
-    <flow id="flow_WS" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="462.26" route="W_to_S" />
+    <flow id="flow_EN" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="435.68" route="E_to_N" />
+    <flow id="flow_ES" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="547.4" route="E_to_S" />
+    <flow id="flow_EW" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="521.44" route="E_to_W" />
+    <flow id="flow_NE" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="454.49" route="N_to_E" />
+    <flow id="flow_NS" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="513.32" route="N_to_S" />
+    <flow id="flow_NW" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="559.3" route="N_to_W" />
+    <flow id="flow_SE" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="492.68" route="S_to_E" />
+    <flow id="flow_SN" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="454.64" route="S_to_N" />
+    <flow id="flow_SW" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="478.7" route="S_to_W" />
+    <flow id="flow_WE" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="431.44" route="W_to_E" />
+    <flow id="flow_WN" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="547.47" route="W_to_N" />
+    <flow id="flow_WS" type="indian_mixed_traffic" begin="0.00" end="3600.00" perHour="497.73" route="W_to_S" />
     <vehicle id="emg_test" type="emergency" route="N_to_S" depart="100.00" />
-<vehicle id="emg_1000_0" type="emergency" route="E_to_W" depart="1671.69" /><vehicle id="emg_1000_1" type="emergency" route="S_to_N" depart="1517.0" /></routes>
+<vehicle id="emg_1007_0" type="emergency" route="W_to_E" depart="1978.8" /></routes>

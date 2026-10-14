@@ -1,58 +1,63 @@
 """
 Shared per-junction control logic for the 8-phase signal design.
 
-This encodes the phase map validated in single_intersection_simulation/map.net.xml:
+This encodes the phase map in single_intersection_simulation/map.net.xml:
 
-    Phase 0 -> NS through            (green, ~37s nominal)
+    Phase 0 -> NS through            (agent-controlled: held until "switch")
     Phase 1 -> NS->EW yellow         (3s, automatic)
-    Phase 2 -> protected right turns: N->E (idx3) + S->W (idx11)  (5s green)
+    Phase 2 -> protected right turns: N->E (idx3) + S->W (idx11)  (5s, automatic)
     Phase 3 -> protected-turn yellow (2s, automatic)
-    Phase 4 -> EW through            (green, ~37s nominal)
+    Phase 4 -> EW through            (agent-controlled: held until "switch")
     Phase 5 -> EW->NS yellow         (3s, automatic)
-    Phase 6 -> protected right turns: E->S (idx7) + W->N (idx15) (5s green)
+    Phase 6 -> protected right turns: E->S (idx7) + W->N (idx15) (5s, automatic)
     Phase 7 -> protected-turn yellow (2s, automatic)
 
 Both single-agent (TrafficEnv) and multi-agent (MultiAgentTrafficEnv) wrap
 one IntersectionController per traffic light instead of hand-duplicating
 this logic, so a fix here fixes every topology at once.
 
+PHASE TIMING OWNERSHIP:
+The through phases (0 and 4) have a very long programmed duration in the
+tlLogic (3600s), so SUMO never ends them on its own: "keep" really holds.
+Every other phase (yellows and protected-turn greens) runs on its fixed
+programmed timer and SUMO advances through them in index order. The
+controller therefore only ever calls setPhase() on a through phase, to
+jump to its yellow; SUMO then plays the full yellow, the protected turn
+and the next through phase automatically. Minimum green is measured with
+SUMO's own getSpentDuration(), so there is no separate timer to drift.
+
 ACTION SEMANTICS (binary action space):
-Action 1 ("switch") always advances to the NEXT phase in the fixed cycle
-0 -> 2 -> 4 -> 6 -> 0, inserting the mandatory yellow automatically. The
-agent cannot skip a protected-turn phase or jump directly between the two
-through-phases — this is "Option A" (strict cycle advance), chosen to keep
-the binary action space's meaning unambiguous while supporting >2 greens.
-If/when a Discrete(4) direct-phase-selection action space is added for
-comparison, it can call advance_to(target_phase) instead of advance().
+Action 1 ("switch") ends the current through phase. The fixed sequence
+that follows is: yellow -> protected right turns -> yellow -> opposite
+through phase (0 -> 1 -> 2 -> 3 -> 4 and 4 -> 5 -> 6 -> 7 -> 0). The
+agent cannot skip a protected-turn phase or shorten a yellow. Action 1 is
+ignored during yellow / protected-turn phases and before min_green has
+elapsed on the current through phase. If/when a Discrete(4) direct-phase
+selection action space is added for comparison, it can reuse advance().
 
-REWARD WEIGHTING — one unified weighted sum, two weight sources:
-
-Every vehicle's waiting time is weighted and summed in a single formula.
-Ordinary vehicles get a weight derived from physical length relative to a
-car (length already present in the .rou.xml vType definitions — no
-external citation needed), read live via traci.vehicle.getLength(). This
-ties the penalty to road-space / clearance-time cost.
-
-Emergency vehicles get a flat, length-independent weight instead — their
-priority comes from being an emergency vehicle, not from their physical
-size, so length plays no role in their weight (a bulkier ambulance isn't
-weighted any differently than a smaller one). This is a bias applied on
-top of the same unified sum, not a separate additive term with its own
-coefficient — simpler than keeping two parallel formulas.
+REWARD WEIGHTING:
+Ordinary vehicles' waiting time is weighted by physical length relative
+to a car (length is already in the .rou.xml vType definitions), read live
+via traci.vehicle.getLength(). This ties the penalty to road-space /
+clearance-time cost. Emergency vehicles are excluded from that sum and
+penalised through a separate, length-independent term with its own
+coefficient, since their priority comes from being an emergency vehicle,
+not from their size.
 """
 
+import numpy as np
 import traci
 
 
-# The four GREEN phases in cycle order. Each maps to the yellow phase that
-# must play immediately after it, before the next green takes effect.
-GREEN_PHASES = [0, 2, 4, 6]
-YELLOW_AFTER = {0: 1, 2: 3, 4: 5, 6: 7}
+# Through phases the agent controls, and the yellow that follows each one.
+# After the yellow, SUMO auto-advances (protected turn -> yellow -> next
+# through phase) using the durations programmed in the tlLogic.
+CONTROLLED_PHASES = [0, 4]
+YELLOW_AFTER = {0: 1, 4: 5}
 
-# Nominal/expected durations (seconds) for sanity-checking against the
-# actual net.xml tlLogic — used by the validation check, not by control logic.
-EXPECTED_GREEN_DURATION = {0: 37, 2: 5, 4: 37, 6: 5}
-EXPECTED_YELLOW_DURATION = {1: 3, 3: 2, 5: 3, 7: 2}
+# Expected programmed durations (seconds) per phase, for validating against
+# the actual net.xml tlLogic. Through phases are "held" (very long).
+EXPECTED_DURATION = {0: 3600, 1: 3, 2: 5, 3: 2, 4: 3600, 5: 3, 6: 5, 7: 2}
 
 # --- Reward weighting constants ---
 
@@ -73,82 +78,74 @@ class IntersectionController:
     junction's own incoming-lane list.
     """
 
-    def __init__(self, tls_id, lanes_by_direction, min_green=10):
+    def __init__(self, tls_id, lanes_by_direction, min_green=10, max_green=90):
         """
         tls_id: SUMO traffic light id, e.g. "J4"
         lanes_by_direction: dict with keys "north","south","east","west",
             each a list of incoming lane IDs for that approach.
-        min_green: minimum seconds a green phase must hold before the
-            agent's switch action is allowed to take effect.
+        min_green: minimum seconds a through phase must have been active
+            before the agent's switch action is allowed to take effect.
         """
         self.tls_id = tls_id
         self.lanes_by_direction = lanes_by_direction
         self.min_green = min_green
-        self.phase_time = 0
+        self.max_green = max_green
 
     def reset(self):
-        self.phase_time = 0
+        # No controller-side timers: phase timing is read from SUMO.
+        pass
 
     # ---- phase control -------------------------------------------------
 
-    def current_green(self):
-        """Returns the current phase if it's a green phase, else None
-        (i.e. we're mid-yellow — callers should treat this as 'busy')."""
+    def current_controlled_phase(self):
+        """Returns the current phase if it's an agent-controlled through
+        phase, else None (we're in a yellow / protected-turn phase that
+        SUMO is running on its own timer)."""
         phase = traci.trafficlight.getPhase(self.tls_id)
-        return phase if phase in GREEN_PHASES else None
+        return phase if phase in CONTROLLED_PHASES else None
 
-    def apply_action(self, action):
+    def apply_action(self, action, hold=False):
         """
-        action: 0 = keep current phase, 1 = advance to next phase in cycle.
-        Enforces minimum green time. No-ops silently if called mid-yellow
-        (yellow phases run to completion automatically via SUMO's own
-        tlLogic durations — the agent doesn't control yellow timing).
+        action: 0 = keep current phase, 1 = end the current through phase.
+        No-ops silently during yellow / protected-turn phases (SUMO runs
+        those to completion) and until min_green has elapsed.
         """
-        self.phase_time += 5  # caller advances sim in 5s steps; kept here
-                               # so this class owns its own timer state.
-
-        current_phase = traci.trafficlight.getPhase(self.tls_id)
-
-        if current_phase not in GREEN_PHASES:
-            # Mid-transition (yellow) — do nothing, let SUMO finish it.
+        phase = traci.trafficlight.getPhase(self.tls_id)
+        if phase not in CONTROLLED_PHASES:
             return
 
-        if action == 1 and self.phase_time >= self.min_green:
+        spent = traci.trafficlight.getSpentDuration(self.tls_id)
+
+        if not hold and spent >= self.max_green:
+            action = 1
+
+        if action == 1 and spent >= self.min_green:
             self.advance()
 
     def advance(self):
-        """Force-advance to the next phase in the fixed green cycle,
-        playing the mandatory yellow in between. Resets the green timer."""
-        current_phase = traci.trafficlight.getPhase(self.tls_id)
-        if current_phase not in GREEN_PHASES:
-            return  # already mid-transition; ignore
-
-        yellow = YELLOW_AFTER[current_phase]
-        next_index = (GREEN_PHASES.index(current_phase) + 1) % len(GREEN_PHASES)
-        next_green = GREEN_PHASES[next_index]
-
-        traci.trafficlight.setPhase(self.tls_id, yellow)
-        traci.simulationStep()
-        traci.trafficlight.setPhase(self.tls_id, next_green)
-        self.phase_time = 0
+        """End the current through phase by jumping to its yellow. SUMO then
+        plays the full yellow, the protected-turn phase and the next
+        through phase on its own. Ignored if not in a through phase."""
+        phase = traci.trafficlight.getPhase(self.tls_id)
+        if phase not in YELLOW_AFTER:
+            return
+        traci.trafficlight.setPhase(self.tls_id, YELLOW_AFTER[phase])
 
     def force_green(self, target_green):
         """
-        Used by emergency preemption: advance directly toward a specific
-        through-phase (0 or 4), stepping through the cycle one hop at a
-        time if needed, playing yellows correctly. No-ops if already there
-        or if currently mid-yellow (caller should retry next step).
+        Used by emergency preemption: head toward a specific through phase
+        (0 or 4). No-ops if already there, or if mid-transition (SUMO is
+        already moving to the next through phase; caller retries next step).
+        Bypasses min_green by design.
         """
         if target_green not in (0, 4):
             raise ValueError("force_green only supports through-phases 0 or 4")
 
-        current_phase = traci.trafficlight.getPhase(self.tls_id)
-        if current_phase == target_green:
+        phase = traci.trafficlight.getPhase(self.tls_id)
+        if phase == target_green or phase not in CONTROLLED_PHASES:
             return
-        if current_phase not in GREEN_PHASES:
-            return  # mid-yellow — caller retries next step
 
-        self.advance()  # one hop toward target; caller calls again if not there yet
+        self.advance()
 
     # ---- state / reward --------------------------------------------------
 
@@ -164,26 +161,23 @@ class IntersectionController:
 
     def get_normalized_state(self):
         """[q_n, q_s, q_e, q_w, phase] normalised to [0,1]."""
-        import numpy as np
-
         queues = self.get_queues()
         phase = traci.trafficlight.getPhase(self.tls_id)
 
         state = np.array(queues + [phase], dtype=np.float32)
         state[0:4] /= 50.0
-        state[4] /= 7.0  # 8 phases now (0-7), was /3.0 under the old 4-phase scheme
+        state[4] /= 7.0  # phases 0-7
         return np.clip(state, 0.0, 1.0)
 
     def _length_weight(self, vehicle_id):
         """Length-based weight relative to a car, read live via TraCI so it
         tracks .rou.xml vType lengths without needing a hardcoded table.
-        Only used for ordinary (non-emergency) vehicles — see module docstring."""
+        Only used for ordinary (non-emergency) vehicles."""
         return traci.vehicle.getLength(vehicle_id) / CAR_REFERENCE_LENGTH
 
     def compute_reward(self):
         """
-        Three-part reward, mirroring the original structure but with
-        ordinary-traffic wait time now length-weighted:
+        Three-part reward:
 
           -WAIT_WEIGHT * (length-weighted ordinary wait time)
           -QUEUE_WEIGHT * (raw queue count, all vehicles)
@@ -192,8 +186,6 @@ class IntersectionController:
         Emergency vehicles are excluded from the length-weighted sum —
         their cost is handled entirely by the separate emergency term.
         """
-        import numpy as np
-
         valid = set(traci.lane.getIDList())
         all_lanes = [l for lanes in self.lanes_by_direction.values() for l in lanes if l in valid]
 
@@ -225,16 +217,17 @@ class IntersectionController:
 
     def validate_phase_durations(self, tolerance=1.0):
         """
-        Debug helper — call after reset() or a phase switch. Confirms the
-        currently-active phase's programmed duration matches what we expect
-        for the 8-phase design. Returns (ok: bool, message: str).
-        Catches the 'agent silently stuck in a 5s phase thinking it's a
-        37s phase' failure mode.
+        Debug helper — call after reset() or a phase change. Confirms the
+        currently-active phase's programmed duration matches the 8-phase
+        design (through phases 3600s, protected turns 5s, yellows 3s/2s).
+        Returns (ok: bool, message: str). Catches a net.xml tlLogic that
+        doesn't match what the controller assumes, e.g. through phases
+        that still time out on their own.
         """
         phase = traci.trafficlight.getPhase(self.tls_id)
         actual = traci.trafficlight.getPhaseDuration(self.tls_id)
 
-        expected = EXPECTED_GREEN_DURATION.get(phase, EXPECTED_YELLOW_DURATION.get(phase))
+        expected = EXPECTED_DURATION.get(phase)
         if expected is None:
             return False, f"[{self.tls_id}] Unknown phase index {phase} — not in 8-phase map."
 

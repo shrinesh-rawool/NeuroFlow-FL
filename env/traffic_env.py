@@ -1,6 +1,7 @@
 import gymnasium as gym
 import numpy as np
 import traci
+import os
 from gymnasium import spaces
 
 from env.emergency_preemption import EmergencyPreemption
@@ -18,12 +19,15 @@ class TrafficEnv(gym.Env):
     and the rationale for this "strict cycle advance" behavior.
     """
 
-    def __init__(self, sumo_cfg, max_steps=3600, use_gui=False, delay=0):
+    def __init__(self, sumo_cfg, max_steps=3600, use_gui=False, delay=0, max_green=90):
         super().__init__()
 
+        self.arrived_total=0
         self.sumo_cfg = sumo_cfg
         self.max_steps = max_steps
         self.step_count = 0
+        self.label = f"env_{os.getpid()}_{id(self)}"
+        self._started = False
 
         self.tls_id = "J4"  # traffic light id — matches map.net.xml
 
@@ -53,6 +57,7 @@ class TrafficEnv(gym.Env):
             tls_id=self.tls_id,
             lanes_by_direction=lanes_by_direction,
             min_green=10,
+            max_green=max_green,
         )
 
         # Emergency vehicle preemption module
@@ -64,12 +69,13 @@ class TrafficEnv(gym.Env):
             self.sumo_cmd += ["--delay", str(delay)]
 
     def reset(self, seed=None, options=None):
-        if traci.isLoaded():
-            traci.close()
-
-        traci.start(self.sumo_cmd)
+        super().reset(seed=seed)
+        self.close()
+        traci.start(self.sumo_cmd, label=self.label)
+        self._started = True
 
         self.step_count = 0
+        self.arrived_total = 0
         self.controller.reset()
 
         observation = self.controller.get_normalized_state()
@@ -79,16 +85,20 @@ class TrafficEnv(gym.Env):
         # Emergency preemption overrides the agent when a vehicle is
         # approaching; holds/forces green toward the vehicle's direction
         # until it has cleared.
+        traci.switch(self.label)
+        hold = False
         if self.emergency.check_for_emergency():
             self.emergency.apply_preemption(self.controller)
             if self.emergency.should_hold_green():
-                action = 0  # prevent agent from switching away
+                action = 0      # prevent agent from switching away
+                hold = True     # emergency overrides the max-green cap
 
         # min-green enforcement lives inside the controller now
-        self.controller.apply_action(action)
+        self.controller.apply_action(action, hold=hold)
 
         for _ in range(5):  # 5 sec decision interval
             traci.simulationStep()
+            self.arrived_total += traci.simulation.getArrivedNumber()
 
         self.step_count += 5
 
@@ -101,5 +111,11 @@ class TrafficEnv(gym.Env):
         return state, reward, terminated, truncated, {}
 
     def close(self):
-        if traci.isLoaded():
-            traci.close()
+        if self._started:
+            try:
+                traci.switch(self.label)
+                traci.close()
+            except Exception:
+                pass
+            finally:
+                self._started = False

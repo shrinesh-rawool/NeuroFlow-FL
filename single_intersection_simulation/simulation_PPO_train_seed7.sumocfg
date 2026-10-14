@@ -3,7 +3,11 @@
 
     <input>
         <net-file value="map.net.xml" />
-        <route-files value="traffic_test_PPO_train_seed999.rou.xml" />
+        <route-files value="traffic_PPO_train_seed7.rou.xml" />
     </input>
+
+    <processing>
+        <time-to-teleport value="-1" />
+    </processing>
 
 </sumoConfiguration>
