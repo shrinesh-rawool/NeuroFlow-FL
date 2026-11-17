@@ -18,20 +18,23 @@ from single_intersection_simulation.write_route import write_route_file
 from env.traffic_env import TrafficEnv
 from agents.dqn_agent import train_dqn
 from agents.ppo_agent import train_ppo
+from gymnasium.wrappers import TransformReward
 
 CSV_HEADER = [
     "Algorithm", "Seed", "Reward", "Avg_Wait_s", "Avg_Queue_veh",
-    "Throughput_veh", "Backlog_veh", "Switch_Frac",
+    "Throughput_veh", "Backlog_veh", "Switch_Frac", "Emg_Time_s", "Emg_Wait_s",
 ]
 
+def scale_reward(env, scale=1000.0):
+    return TransformReward(env, lambda r: r / scale)
 
-def create_env_for_seed(seed, mode):
+def create_env_for_seed(seed, mode, baseline_rate=500.0):
     base_dir = "single_intersection_simulation"
     base_route = os.path.join(base_dir, "traffic.rou.xml")
     base_cfg = os.path.join(base_dir, "simulation.sumocfg")
 
     # Generate rates and write route file (passing seed for randomized emergency vehicles)
-    rates = generate_route_rates(seed, baseline_rate=500.0, noise_pct=0.15)
+    rates = generate_route_rates(seed, baseline_rate=baseline_rate, noise_pct=0.15)
     new_route_name = f"traffic_{mode}_seed{seed}.rou.xml"
     write_route_file(rates, base_route, os.path.join(base_dir, new_route_name), seed=seed)
 
@@ -56,12 +59,15 @@ def evaluate_model(model, eval_env, num_steps=720):
       throughput    vehicles that completed their trip (env.arrived_total)
       backlog       vehicles still waiting to enter the network at the end
       switch_frac   fraction of decision steps where the policy chose "switch"
+      emg_time      mean time in network across tracked emergency vehicles
+      emg_wait      mean worst stop (max waiting time) across emergency vehicles
     """
     obs, info = eval_env.reset()
     total_reward = 0.0
     actions = []
     queues = []
     wait_times = []
+    emg_seen = {}  # veh_id -> [steps_in_network, max_wait]
 
     for _ in range(num_steps):
         action, _states = model.predict(obs, deterministic=True)
@@ -72,11 +78,15 @@ def evaluate_model(model, eval_env, num_steps=720):
         # obs = [q_n, q_s, q_e, q_w, phase] normalized. Multiply by 50 to get raw counts.
         queues.append(np.sum(obs[0:4]) * 50.0)
 
-        # Extract raw wait times for all vehicles currently in the network.
+        # Extract raw wait times and track emergency vehicles
         # Switch explicitly so we always query THIS env's simulation.
         traci.switch(eval_env.label)
         for veh_id in traci.vehicle.getIDList():
             wait_times.append(traci.vehicle.getWaitingTime(veh_id))
+            if traci.vehicle.getTypeID(veh_id) == "emergency":
+                rec = emg_seen.setdefault(veh_id, [0, 0.0])
+                rec[0] += 5
+                rec[1] = max(rec[1], traci.vehicle.getWaitingTime(veh_id))
 
         if terminated or truncated:
             break
@@ -88,6 +98,9 @@ def evaluate_model(model, eval_env, num_steps=720):
 
     eval_env.close()
 
+    emg_time = float(np.mean([v[0] for v in emg_seen.values()])) if emg_seen else 0.0
+    emg_wait = float(np.mean([v[1] for v in emg_seen.values()])) if emg_seen else 0.0
+
     return {
         "reward": total_reward,
         "avg_wait": float(np.mean(wait_times)) if wait_times else 0.0,
@@ -95,6 +108,8 @@ def evaluate_model(model, eval_env, num_steps=720):
         "throughput": throughput,
         "backlog": backlog,
         "switch_frac": float(np.mean(actions)) if actions else 0.0,
+        "emg_time": emg_time,
+        "emg_wait": emg_wait,
     }
 
 
@@ -113,10 +128,13 @@ def main():
     parser = argparse.ArgumentParser(description="Run NeuroFlow-FL Campaign")
     parser.add_argument("--algo", type=str, choices=["DQN", "PPO", "ALL"], default="ALL", help="Algorithm to train")
     parser.add_argument("--seeds", type=int, nargs="+", default=[10, 42, 99, 128, 256, 512, 1024, 2048], help="List of random seeds")
+    parser.add_argument("--baseline-rate", type=float, default=500.0, help="Baseline arrival rate (veh/hr/lane)")
     parser.add_argument("--timesteps", type=int, default=200000, help="Training timesteps per run")
     parser.add_argument("--eval-freq", type=int, default=10000, help="EvalCallback frequency (timesteps)")
     parser.add_argument("--csv", type=str, default="results/campaign_metrics.csv", help="Output metrics CSV")
     args = parser.parse_args()
+
+    rate = args.baseline_rate
 
     algorithms = {}
     if args.algo in ["DQN", "ALL"]:
@@ -139,7 +157,7 @@ def main():
 
     print("=" * 60)
     print("STARTING TASK 2.4 TRAINING CAMPAIGN")
-    print(f"Algorithms: {list(algorithms.keys())} | Seeds: {seeds} | Timesteps: {timesteps} | Eval freq: {args.eval_freq}")
+    print(f"Algorithms: {list(algorithms.keys())} | Seeds: {seeds} | Baseline Rate: {args.baseline_rate} | Timesteps: {timesteps} | Eval freq: {args.eval_freq}")
     print(f"Metrics CSV: {csv_file}")
     print("=" * 60)
 
@@ -153,8 +171,8 @@ def main():
                 run_id = f"{algo_name}_seed{seed}"
                 print(f"  -> Training {run_id}")
 
-                train_env = create_env_for_seed(seed, f"{algo_name}_train")
-                eval_env = create_env_for_seed(seed + 1000, f"{algo_name}_eval")
+                train_env = scale_reward(create_env_for_seed(seed, f"{algo_name}_train", rate))
+                eval_env = create_env_for_seed(seed + 1000, f"{algo_name}_eval", args.baseline_rate)
                 metric_eval_env = None
 
                 try:
@@ -169,13 +187,16 @@ def main():
 
                     # Evaluate model on the held-out demand (seed + 1000)
                     print(f"  -> Evaluating {run_id}")
-                    metric_eval_env = create_env_for_seed(seed + 1000, f"{algo_name}_metric_eval")
+                    metric_eval_env = create_env_for_seed(seed + 1000, f"{algo_name}_metric_eval", args.baseline_rate)
                     m = evaluate_model(model, metric_eval_env)
 
                     print(
                         f"     [Result] Reward: {m['reward']:.2f} | Avg Wait: {m['avg_wait']:.2f}s | "
                         f"Avg Total Q: {m['avg_queue']:.2f} | Throughput: {m['throughput']} | "
                         f"Backlog: {m['backlog']}"
+                    )
+                    print(
+                        f"     [Emergency] Avg Transit: {m['emg_time']:.1f}s | Avg Max Stop: {m['emg_wait']:.1f}s"
                     )
                     print(f"     [Policy] fraction of switch actions: {m['switch_frac']:.2f}")
 
@@ -189,6 +210,7 @@ def main():
                         algo_name, seed,
                         round(m["reward"], 2), round(m["avg_wait"], 2), round(m["avg_queue"], 2),
                         m["throughput"], m["backlog"], round(m["switch_frac"], 3),
+                        round(m["emg_time"], 2), round(m["emg_wait"], 2),
                     ])
                     f.flush()  # Force write to disk immediately in case of crash
 

@@ -1,0 +1,2 @@
+Algorithm,Seed,Reward,Avg_Wait_s,Avg_Queue_veh,Throughput_veh,Backlog_veh,Switch_Frac,Emg_Time_s,Emg_Wait_s
+DQN,7,-173969.93,5.94,36.71,2520,69,0.592,37.5,7.5

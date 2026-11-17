@@ -1,0 +1,2 @@
+Algorithm,Seed,Reward,Avg_Wait_s,Avg_Queue_veh,Throughput_veh,Backlog_veh,Switch_Frac,Emg_Time_s,Emg_Wait_s
+PPO,7,-184274.32,6.08,37.8,2551,39,1.0,47.5,7.5
