@@ -160,13 +160,15 @@ class IntersectionController:
         return queues
 
     def get_normalized_state(self):
-        """[q_n, q_s, q_e, q_w, phase] normalised to [0,1]."""
+        """[q_n, q_s, q_e, q_w, phase, time_in_phase] normalised to [0,1]."""
         queues = self.get_queues()
         phase = traci.trafficlight.getPhase(self.tls_id)
+        spent = traci.trafficlight.getSpentDuration(self.tls_id)
 
-        state = np.array(queues + [phase], dtype=np.float32)
+        state = np.array(queues + [phase, spent], dtype=np.float32)
         state[0:4] /= 50.0
-        state[4] /= 7.0  # phases 0-7
+        state[4] /= 7.0
+        state[5] /= self.max_green
         return np.clip(state, 0.0, 1.0)
 
     def _length_weight(self, vehicle_id):

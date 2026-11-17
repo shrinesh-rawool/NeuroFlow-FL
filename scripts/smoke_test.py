@@ -42,7 +42,7 @@ def main():
                 pegged_reward_count += 1
 
             # Log metrics
-            q_n, q_s, q_e, q_w, phase = obs
+            q_n, q_s, q_e, q_w, phase, t_phase = obs
             # Un-normalize queues for logging (multiplied back by 50.0 as per controller logic)
             writer.writerow([step, phase * 7.0, q_n * 50, q_s * 50, q_e * 50, q_w * 50, reward])
 

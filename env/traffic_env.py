@@ -1,7 +1,7 @@
+import os
 import gymnasium as gym
 import numpy as np
 import traci
-import os
 from gymnasium import spaces
 
 from env.emergency_preemption import EmergencyPreemption
@@ -22,7 +22,7 @@ class TrafficEnv(gym.Env):
     def __init__(self, sumo_cfg, max_steps=3600, use_gui=False, delay=0, max_green=90):
         super().__init__()
 
-        self.arrived_total=0
+        self.arrived_total = 0
         self.sumo_cfg = sumo_cfg
         self.max_steps = max_steps
         self.step_count = 0
@@ -32,11 +32,11 @@ class TrafficEnv(gym.Env):
         self.tls_id = "J4"  # traffic light id — matches map.net.xml
 
         # Observation space
-        # [queue_n, queue_s, queue_e, queue_w, phase]
+        # [queue_n, queue_s, queue_e, queue_w, phase, time_in_phase]
         # All values normalised to [0, 1] — bounds match IntersectionController.get_normalized_state()
         self.observation_space = spaces.Box(
-            low=np.zeros(5, dtype=np.float32),
-            high=np.ones(5, dtype=np.float32),
+            low=np.zeros(6, dtype=np.float32),
+            high=np.ones(6, dtype=np.float32),
             dtype=np.float32,
         )
 
@@ -64,7 +64,13 @@ class TrafficEnv(gym.Env):
         self.emergency = EmergencyPreemption(tls_id=self.tls_id)
 
         binary = "sumo-gui" if use_gui else "sumo"
-        self.sumo_cmd = [binary, "-c", self.sumo_cfg, "--start", "--quit-on-end"]
+        self.sumo_cmd = [
+            binary,
+            "-c", self.sumo_cfg,
+            "--start",
+            "--quit-on-end",
+            "--no-step-log", "true",
+        ]
         if use_gui and delay > 0:
             self.sumo_cmd += ["--delay", str(delay)]
 
