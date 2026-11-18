@@ -50,37 +50,42 @@ def create_env_for_seed(seed, mode, baseline_rate=500.0):
     return TrafficEnv(sumo_cfg=new_cfg_path)
 
 
-def evaluate_model(model, eval_env, num_steps=720):
+def evaluate_model(model, eval_env, run_id=None, num_steps=720):
     """
     Returns a dict of metrics for one deterministic evaluation episode:
-      reward        total episode reward
-      avg_wait      mean per-vehicle waiting time, sampled each decision step
-      avg_queue     mean total halting-vehicle count across approaches
-      throughput    vehicles that completed their trip (env.arrived_total)
-      backlog       vehicles still waiting to enter the network at the end
-      switch_frac   fraction of decision steps where the policy chose "switch"
-      emg_time      mean time in network across tracked emergency vehicles
-      emg_wait      mean worst stop (max waiting time) across emergency vehicles
+      reward              total episode reward
+      avg_wait            mean per-vehicle waiting time, sampled each decision step
+      avg_queue           mean total halting-vehicle count across approaches
+      throughput          vehicles that completed their trip (env.arrived_total)
+      backlog             vehicles still waiting to enter the network at the end
+      switch_frac         fraction of decision steps where the policy chose "switch"
+      requested_switches  total switch actions requested (not overridden by emergency hold)
+      executed_switches   total switches actually executed by the controller
+      emg_time            mean time in network across tracked emergency vehicles
+      emg_wait            mean worst stop (max waiting time) across emergency vehicles
     """
     obs, info = eval_env.reset()
     total_reward = 0.0
     actions = []
+    action_trace = []
     queues = []
     wait_times = []
     emg_seen = {}  # veh_id -> [steps_in_network, max_wait]
 
-    for _ in range(num_steps):
+    for step in range(num_steps):
         action, _states = model.predict(obs, deterministic=True)
         actions.append(int(action))
         obs, reward, terminated, truncated, info = eval_env.step(action)
         total_reward += reward
 
-        # obs = [q_n, q_s, q_e, q_w, phase] normalized. Multiply by 50 to get raw counts.
+        traci.switch(eval_env.label)
+        phase_after = int(round(eval_env.controller.get_normalized_state()[4] * 7))
+        action_trace.append((step, int(action), phase_after))
+
+        # obs = [q_n, q_s, q_e, q_w, phase, time_in_phase] normalized. Multiply by 50 to get raw counts.
         queues.append(np.sum(obs[0:4]) * 50.0)
 
         # Extract raw wait times and track emergency vehicles
-        # Switch explicitly so we always query THIS env's simulation.
-        traci.switch(eval_env.label)
         for veh_id in traci.vehicle.getIDList():
             wait_times.append(traci.vehicle.getWaitingTime(veh_id))
             if traci.vehicle.getTypeID(veh_id) == "emergency":
@@ -91,10 +96,20 @@ def evaluate_model(model, eval_env, num_steps=720):
         if terminated or truncated:
             break
 
+    if run_id is not None:
+        os.makedirs("results", exist_ok=True)
+        trace_path = os.path.join("results", f"actions_{run_id}.csv")
+        with open(trace_path, mode="w", newline="") as tf:
+            tw = csv.writer(tf)
+            tw.writerow(["Step", "Action", "Phase"])
+            tw.writerows(action_trace)
+
     # Read end-of-episode stats BEFORE closing the simulation.
     traci.switch(eval_env.label)
     backlog = len(traci.simulation.getPendingVehicles())
     throughput = getattr(eval_env, "arrived_total", 0)
+    requested = eval_env.requested_switches
+    executed = eval_env.executed_switches
 
     eval_env.close()
 
@@ -108,6 +123,8 @@ def evaluate_model(model, eval_env, num_steps=720):
         "throughput": throughput,
         "backlog": backlog,
         "switch_frac": float(np.mean(actions)) if actions else 0.0,
+        "requested_switches": requested,
+        "executed_switches": executed,
         "emg_time": emg_time,
         "emg_wait": emg_wait,
     }
@@ -188,7 +205,7 @@ def main():
                     # Evaluate model on the held-out demand (seed + 1000)
                     print(f"  -> Evaluating {run_id}")
                     metric_eval_env = create_env_for_seed(seed + 1000, f"{algo_name}_metric_eval", args.baseline_rate)
-                    m = evaluate_model(model, metric_eval_env)
+                    m = evaluate_model(model, metric_eval_env, run_id=run_id)
 
                     print(
                         f"     [Result] Reward: {m['reward']:.2f} | Avg Wait: {m['avg_wait']:.2f}s | "
@@ -199,6 +216,7 @@ def main():
                         f"     [Emergency] Avg Transit: {m['emg_time']:.1f}s | Avg Max Stop: {m['emg_wait']:.1f}s"
                     )
                     print(f"     [Policy] fraction of switch actions: {m['switch_frac']:.2f}")
+                    print(f"     [Actions] requested switches: {m['requested_switches']} | executed switches: {m['executed_switches']}")
 
                     # Save Model
                     model_path = os.path.join("models", run_id)

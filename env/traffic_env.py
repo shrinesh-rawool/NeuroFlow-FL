@@ -5,7 +5,7 @@ import traci
 from gymnasium import spaces
 
 from env.emergency_preemption import EmergencyPreemption
-from env.intersection_controller import IntersectionController
+from env.intersection_controller import IntersectionController, YELLOW_AFTER
 
 
 class TrafficEnv(gym.Env):
@@ -23,6 +23,8 @@ class TrafficEnv(gym.Env):
         super().__init__()
 
         self.arrived_total = 0
+        self.requested_switches = 0
+        self.executed_switches = 0
         self.sumo_cfg = sumo_cfg
         self.max_steps = max_steps
         self.step_count = 0
@@ -82,6 +84,8 @@ class TrafficEnv(gym.Env):
 
         self.step_count = 0
         self.arrived_total = 0
+        self.requested_switches = 0
+        self.executed_switches = 0
         self.controller.reset()
 
         observation = self.controller.get_normalized_state()
@@ -99,8 +103,15 @@ class TrafficEnv(gym.Env):
                 action = 0      # prevent agent from switching away
                 hold = True     # emergency overrides the max-green cap
 
-        # min-green enforcement lives inside the controller now
+        if action == 1:
+            self.requested_switches += 1
+
+        phase_before = traci.trafficlight.getPhase(self.tls_id)
         self.controller.apply_action(action, hold=hold)
+        phase_after = traci.trafficlight.getPhase(self.tls_id)
+
+        if phase_before in (0, 4) and phase_after == YELLOW_AFTER[phase_before]:
+            self.executed_switches += 1
 
         for _ in range(5):  # 5 sec decision interval
             traci.simulationStep()

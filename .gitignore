@@ -5,3 +5,10 @@ logs_*.txt
 models/
 __pycache__/
 *.py[cod]
+results/logs/
+results/models/
+results/*.csv
+single_intersection_simulation/smoke_*.rou.xml
+single_intersection_simulation/smoke_*.sumocfg
+single_intersection_simulation/traffic_*.rou.xml
+smoke_test_metrics.csv
