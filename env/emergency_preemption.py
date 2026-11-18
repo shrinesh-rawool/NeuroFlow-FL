@@ -1,14 +1,23 @@
 import traci
 
 
+# Approach edges into J4, from single_intersection_simulation/map.net.xml.
+APPROACH_EDGES = {"north_in", "south_in", "east_in", "west_in"}
+INCOMING_NS = {"north_in", "south_in"}
+INCOMING_EW = {"east_in", "west_in"}
+
+
 class EmergencyPreemption:
     """
     Detects an approaching emergency vehicle and forces the signal toward
     the through-phase (0 = NS, 4 = EW) that matches its direction, using
     the shared IntersectionController to do the actual phase advancing
-    (so yellow transitions are always respected — no hard phase jumps).
+    (so yellow transitions are always respected, no hard phase jumps).
 
-    Edge IDs below match single_intersection_simulation/map.net.xml.
+    The hold is active while the vehicle is on an approach edge or inside
+    the junction, and ends when it moves onto an outgoing edge.
+
+    Edge IDs match single_intersection_simulation/map.net.xml.
     """
 
     def __init__(self, tls_id="J4", detection_distance=100):
@@ -16,58 +25,47 @@ class EmergencyPreemption:
         self.detection_distance = detection_distance
         self.active = False
         self.current_vehicle = None
+        self.current_direction = None
 
     def check_for_emergency(self):
-        vehicle_ids = traci.vehicle.getIDList()
-
-        for v in vehicle_ids:
-            if traci.vehicle.getTypeID(v) == "emergency":
-                lane_id = traci.vehicle.getLaneID(v)
-                distance = traci.vehicle.getLanePosition(v)
-                lane_length = traci.lane.getLength(lane_id)
-                dist_to_junction = lane_length - distance
-
-                if dist_to_junction < self.detection_distance:
-                    self.current_vehicle = v
-                    self.active = True
-                    return True
-
-        self.active = False
+        """Returns True if an emergency vehicle is on an approach edge within
+        detection_distance of the stop line. Stores the vehicle and its
+        direction for the rest of the preemption."""
         self.current_vehicle = None
+        self.current_direction = None
+        self.active = False
+
+        for v in traci.vehicle.getIDList():
+            if traci.vehicle.getTypeID(v) != "emergency":
+                continue
+
+            road = traci.vehicle.getRoadID(v)
+            if road not in APPROACH_EDGES:
+                continue
+
+            lane_id = traci.vehicle.getLaneID(v)
+            dist_to_stop_line = (
+                traci.lane.getLength(lane_id) - traci.vehicle.getLanePosition(v)
+            )
+            if dist_to_stop_line < self.detection_distance:
+                self.current_vehicle = v
+                self.current_direction = "NS" if road in INCOMING_NS else "EW"
+                self.active = True
+                return True
+
         return False
 
-    # Edge IDs of lanes approaching J4 from each axis, from
-    # single_intersection_simulation/map.net.xml.
-    INCOMING_NS = {"north_in", "south_in"}
-    INCOMING_EW = {"east_in", "west_in"}
-
     def get_vehicle_direction(self):
-        if not self.current_vehicle:
-            return None
-
-        edge = traci.vehicle.getRoadID(self.current_vehicle)
-
-        if edge in self.INCOMING_NS:
-            return "NS"
-        elif edge in self.INCOMING_EW:
-            return "EW"
-
-        return None
+        """Direction stored at detection time, so it stays valid after the
+        vehicle enters the junction."""
+        return self.current_direction
 
     def apply_preemption(self, controller):
         """
-        controller: the IntersectionController for this tls_id.
-
-        Forces the signal toward phase 0 (NS through) or phase 4 (EW
-        through) depending on the emergency vehicle's approach direction.
-        If the signal is currently in the *other* through-phase or in a
-        protected-turn phase, this advances one hop per call — since this
-        is called every environment step while the vehicle is detected,
-        it will reach the target phase within a few steps rather than in
-        one jump, always playing the correct yellow in between.
-
-        If currently mid-yellow, this is a no-op for this step; it will
-        resume forcing on the next call once SUMO completes the yellow.
+        Forces the signal toward phase 0 (NS through) or phase 4 (EW through)
+        depending on the emergency vehicle's direction. Advances one hop per
+        call; the controller's force_green() respects yellow transitions, so
+        this is a no-op while mid-yellow and resumes on the next call.
         """
         direction = self.get_vehicle_direction()
         if direction is None:
@@ -77,6 +75,13 @@ class EmergencyPreemption:
         controller.force_green(target_green)
 
     def should_hold_green(self):
+        """True while the tracked emergency vehicle is on an approach edge or
+        inside the junction. False once it has left onto an outgoing edge or
+        is no longer in the network."""
         if not self.current_vehicle:
             return False
-        return self.current_vehicle in traci.vehicle.getIDList()
+        if self.current_vehicle not in traci.vehicle.getIDList():
+            return False
+
+        road = traci.vehicle.getRoadID(self.current_vehicle)
+        return road in APPROACH_EDGES or road.startswith(":J4_")
