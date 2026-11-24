@@ -3,14 +3,14 @@ Shared per-junction control logic for the 8-phase signal design.
 
 This encodes the phase map in single_intersection_simulation/map.net.xml:
 
-    Phase 0 -> NS through            (agent-controlled: held until "switch")
-    Phase 1 -> NS->EW yellow         (3s, automatic)
-    Phase 2 -> protected right turns: N->E (idx3) + S->W (idx11)  (5s, automatic)
-    Phase 3 -> protected-turn yellow (2s, automatic)
-    Phase 4 -> EW through            (agent-controlled: held until "switch")
-    Phase 5 -> EW->NS yellow         (3s, automatic)
-    Phase 6 -> protected right turns: E->S (idx7) + W->N (idx15) (5s, automatic)
-    Phase 7 -> protected-turn yellow (2s, automatic)
+    Phase 0 -> NS through                       (agent-controlled, held until "switch")
+    Phase 1 -> NS->EW yellow                    (3s, automatic)
+    Phase 2 -> protected right turns N->E (idx3) + S->W (idx11)   (5s, automatic)
+    Phase 3 -> yellow after phase 2             (2s, automatic)
+    Phase 4 -> EW through                       (agent-controlled, held until "switch")
+    Phase 5 -> EW->NS yellow                    (3s, automatic)
+    Phase 6 -> protected right turns E->S (idx7) + W->N (idx15)   (5s, automatic)
+    Phase 7 -> yellow after phase 6             (2s, automatic)
 
 Both single-agent (TrafficEnv) and multi-agent (MultiAgentTrafficEnv) wrap
 one IntersectionController per traffic light instead of hand-duplicating
@@ -21,10 +21,10 @@ The through phases (0 and 4) have a very long programmed duration in the
 tlLogic (3600s), so SUMO never ends them on its own: "keep" really holds.
 Every other phase (yellows and protected-turn greens) runs on its fixed
 programmed timer and SUMO advances through them in index order. The
-controller therefore only ever calls setPhase() on a through phase, to
-jump to its yellow; SUMO then plays the full yellow, the protected turn
-and the next through phase automatically. Minimum green is measured with
-SUMO's own getSpentDuration(), so there is no separate timer to drift.
+controller only ever calls setPhase() on a through phase, to jump to its
+yellow; SUMO then plays the full yellow, the protected turn and the next
+through phase automatically. Minimum green is measured with SUMO's own
+getSpentDuration(), so there is no separate timer to drift.
 
 ACTION SEMANTICS (binary action space):
 Action 1 ("switch") ends the current through phase. The fixed sequence
@@ -32,8 +32,12 @@ that follows is: yellow -> protected right turns -> yellow -> opposite
 through phase (0 -> 1 -> 2 -> 3 -> 4 and 4 -> 5 -> 6 -> 7 -> 0). The
 agent cannot skip a protected-turn phase or shorten a yellow. Action 1 is
 ignored during yellow / protected-turn phases and before min_green has
-elapsed on the current through phase. If/when a Discrete(4) direct-phase
-selection action space is added for comparison, it can reuse advance().
+elapsed on the current through phase. can_switch() exposes this same test
+so the environment can mask requests that would have no effect.
+
+MAX GREEN:
+If a through phase has run for max_green seconds and no emergency hold is
+active, the controller switches automatically, regardless of the action.
 
 REWARD WEIGHTING:
 Ordinary vehicles' waiting time is weighted by physical length relative
@@ -70,6 +74,8 @@ WAIT_WEIGHT = 0.6          # coefficient on length-weighted ordinary wait time
 QUEUE_WEIGHT = 0.3         # coefficient on raw (unweighted) queue count
 EMERGENCY_WEIGHT = 2.0     # coefficient on raw emergency waiting time (separate term)
 
+SWITCH_PENALTY = 1000.0       # fixed cost per executed switch, in unscaled reward units
+
 
 class IntersectionController:
     """
@@ -104,22 +110,30 @@ class IntersectionController:
         phase = traci.trafficlight.getPhase(self.tls_id)
         return phase if phase in CONTROLLED_PHASES else None
 
+    def can_switch(self):
+        """True if an agent switch action can take effect right now
+        (in a controlled through phase with at least min_green elapsed)."""
+        phase = traci.trafficlight.getPhase(self.tls_id)
+        if phase not in CONTROLLED_PHASES:
+            return False
+        return traci.trafficlight.getSpentDuration(self.tls_id) >= self.min_green
+
     def apply_action(self, action, hold=False):
         """
         action: 0 = keep current phase, 1 = end the current through phase.
-        No-ops silently during yellow / protected-turn phases (SUMO runs
-        those to completion) and until min_green has elapsed.
+
+        Returns without effect if can_switch() is False (not in a through
+        phase, or min_green not yet elapsed). If hold is False and the
+        through phase has reached max_green, the switch is forced regardless
+        of action. An emergency hold (hold=True) disables the max-green cap.
         """
-        phase = traci.trafficlight.getPhase(self.tls_id)
-        if phase not in CONTROLLED_PHASES:
+        if not self.can_switch():
             return
 
-        spent = traci.trafficlight.getSpentDuration(self.tls_id)
-
-        if not hold and spent >= self.max_green:
+        if not hold and traci.trafficlight.getSpentDuration(self.tls_id) >= self.max_green:
             action = 1
 
-        if action == 1 and spent >= self.min_green:
+        if action == 1:
             self.advance()
 
     def advance(self):

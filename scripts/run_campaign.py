@@ -60,6 +60,7 @@ def evaluate_model(model, eval_env, run_id=None, num_steps=720):
       backlog             vehicles still waiting to enter the network at the end
       switch_frac         fraction of decision steps where the policy chose "switch"
       requested_switches  total switch actions requested (not overridden by emergency hold)
+      masked_switches     total switch actions masked out (ineligible phase or < min_green)
       executed_switches   total switches actually executed by the controller
       emg_time            mean time in network across tracked emergency vehicles
       emg_wait            mean worst stop (max waiting time) across emergency vehicles
@@ -109,6 +110,7 @@ def evaluate_model(model, eval_env, run_id=None, num_steps=720):
     backlog = len(traci.simulation.getPendingVehicles())
     throughput = getattr(eval_env, "arrived_total", 0)
     requested = eval_env.requested_switches
+    masked = eval_env.masked_switches
     executed = eval_env.executed_switches
 
     eval_env.close()
@@ -124,6 +126,7 @@ def evaluate_model(model, eval_env, run_id=None, num_steps=720):
         "backlog": backlog,
         "switch_frac": float(np.mean(actions)) if actions else 0.0,
         "requested_switches": requested,
+        "masked_switches": masked,
         "executed_switches": executed,
         "emg_time": emg_time,
         "emg_wait": emg_wait,
@@ -216,7 +219,8 @@ def main():
                         f"     [Emergency] Avg Transit: {m['emg_time']:.1f}s | Avg Max Stop: {m['emg_wait']:.1f}s"
                     )
                     print(f"     [Policy] fraction of switch actions: {m['switch_frac']:.2f}")
-                    print(f"     [Actions] requested switches: {m['requested_switches']} | executed switches: {m['executed_switches']}")
+                    print(f"     [Actions] requested switches: {m['requested_switches']} | "
+                          f"masked: {m['masked_switches']} | executed switches: {m['executed_switches']}")
 
                     # Save Model
                     model_path = os.path.join("models", run_id)
@@ -246,4 +250,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  
