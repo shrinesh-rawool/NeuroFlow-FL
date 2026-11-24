@@ -1,0 +1,522 @@
+============================================================
+STARTING TASK 2.4 TRAINING CAMPAIGN
+Algorithms: ['DQN', 'PPO'] | Seeds: [7] | Baseline Rate: 500.0 | Timesteps: 20000 | Eval freq: 5000
+Metrics CSV: results/sanity_penalty_20k.csv
+============================================================
+
+>>> Running Campaign for DQN
+  -> Training DQN_seed7
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+ Retrying in 1 seconds
+Logging to results/logs/DQN_seed7/DQN_9
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 720      |
+|    ep_rew_mean      | -339     |
+|    exploration_rate | 0.544    |
+| time/               |          |
+|    episodes         | 4        |
+|    fps              | 50       |
+|    time_elapsed     | 57       |
+|    total_timesteps  | 2880     |
+----------------------------------
+/usr/local/lib/python3.11/site-packages/stable_baselines3/common/evaluation.py:71: UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+Eval num_timesteps=5000, episode_reward=-1126543.80 +/- 0.00
+Episode length: 720.00 +/- 0.00
+-----------------------------------
+| eval/               |           |
+|    mean_ep_length   | 720       |
+|    mean_reward      | -1.13e+06 |
+| rollout/            |           |
+|    exploration_rate | 0.208     |
+| time/               |           |
+|    total_timesteps  | 5000      |
+-----------------------------------
+New best mean reward!
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 720      |
+|    ep_rew_mean      | -384     |
+|    exploration_rate | 0.088    |
+| time/               |          |
+|    episodes         | 8        |
+|    fps              | 35       |
+|    time_elapsed     | 164      |
+|    total_timesteps  | 5760     |
+| train/              |          |
+|    learning_rate    | 0.0003   |
+|    loss             | 0.0283   |
+|    n_updates        | 189      |
+----------------------------------
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 720      |
+|    ep_rew_mean      | -393     |
+|    exploration_rate | 0.05     |
+| time/               |          |
+|    episodes         | 12       |
+|    fps              | 38       |
+|    time_elapsed     | 225      |
+|    total_timesteps  | 8640     |
+| train/              |          |
+|    learning_rate    | 0.0003   |
+|    loss             | 0.0241   |
+|    n_updates        | 909      |
+----------------------------------
+/usr/local/lib/python3.11/site-packages/stable_baselines3/common/evaluation.py:71: UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+Eval num_timesteps=10000, episode_reward=-369444.90 +/- 0.00
+Episode length: 720.00 +/- 0.00
+-----------------------------------
+| eval/               |           |
+|    mean_ep_length   | 720       |
+|    mean_reward      | -3.69e+05 |
+| rollout/            |           |
+|    exploration_rate | 0.05      |
+| time/               |           |
+|    total_timesteps  | 10000     |
+| train/              |           |
+|    learning_rate    | 0.0003    |
+|    loss             | 0.0503    |
+|    n_updates        | 1249      |
+-----------------------------------
+New best mean reward!
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 720      |
+|    ep_rew_mean      | -398     |
+|    exploration_rate | 0.05     |
+| time/               |          |
+|    episodes         | 16       |
+|    fps              | 34       |
+|    time_elapsed     | 333      |
+|    total_timesteps  | 11520    |
+| train/              |          |
+|    learning_rate    | 0.0003   |
+|    loss             | 0.0581   |
+|    n_updates        | 1629     |
+----------------------------------
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 720      |
+|    ep_rew_mean      | -392     |
+|    exploration_rate | 0.05     |
+| time/               |          |
+|    episodes         | 20       |
+|    fps              | 36       |
+|    time_elapsed     | 394      |
+|    total_timesteps  | 14400    |
+| train/              |          |
+|    learning_rate    | 0.0003   |
+|    loss             | 0.113    |
+|    n_updates        | 2349     |
+----------------------------------
+/usr/local/lib/python3.11/site-packages/stable_baselines3/common/evaluation.py:71: UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+Eval num_timesteps=15000, episode_reward=-369444.90 +/- 0.00
+Episode length: 720.00 +/- 0.00
+-----------------------------------
+| eval/               |           |
+|    mean_ep_length   | 720       |
+|    mean_reward      | -3.69e+05 |
+| rollout/            |           |
+|    exploration_rate | 0.05      |
+| time/               |           |
+|    total_timesteps  | 15000     |
+| train/              |           |
+|    learning_rate    | 0.0003    |
+|    loss             | 0.451     |
+|    n_updates        | 2499      |
+-----------------------------------
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+----------------------------------
+| rollout/            |          |
+|    ep_len_mean      | 720      |
+|    ep_rew_mean      | -392     |
+|    exploration_rate | 0.05     |
+| time/               |          |
+|    episodes         | 24       |
+|    fps              | 34       |
+|    time_elapsed     | 501      |
+|    total_timesteps  | 17280    |
+| train/              |          |
+|    learning_rate    | 0.0003   |
+|    loss             | 0.144    |
+|    n_updates        | 3069     |
+----------------------------------
+/usr/local/lib/python3.11/site-packages/stable_baselines3/common/evaluation.py:71: UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+Eval num_timesteps=20000, episode_reward=-369444.90 +/- 0.00
+Episode length: 720.00 +/- 0.00
+-----------------------------------
+| eval/               |           |
+|    mean_ep_length   | 720       |
+|    mean_reward      | -3.69e+05 |
+| rollout/            |           |
+|    exploration_rate | 0.05      |
+| time/               |           |
+|    total_timesteps  | 20000     |
+| train/              |           |
+|    learning_rate    | 0.0003    |
+|    loss             | 0.0362    |
+|    n_updates        | 3749      |
+-----------------------------------
+  -> Evaluating DQN_seed7
+ Retrying in 1 seconds
+     [Result] Reward: -369444.90 | Avg Wait: 9.04s | Avg Total Q: 51.68 | Throughput: 2586 | Backlog: 3262
+     [Emergency] Avg Transit: 220.0s | Avg Max Stop: 60.0s
+     [Policy] fraction of switch actions: 0.64
+     [Actions] requested switches: 446 | masked: 278 | executed switches: 169
+     [Saved Model] models/DQN_seed7.zip
+
+>>> Running Campaign for PPO
+  -> Training PPO_seed7
+Using cpu device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+ Retrying in 1 seconds
+Logging to results/logs/PPO_seed7/PPO_6
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 720      |
+|    ep_rew_mean     | -325     |
+| time/              |          |
+|    fps             | 47       |
+|    iterations      | 1        |
+|    time_elapsed    | 42       |
+|    total_timesteps | 2048     |
+---------------------------------
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+-----------------------------------------
+| rollout/                |             |
+|    ep_len_mean          | 720         |
+|    ep_rew_mean          | -357        |
+| time/                   |             |
+|    fps                  | 48          |
+|    iterations           | 2           |
+|    time_elapsed         | 83          |
+|    total_timesteps      | 4096        |
+| train/                  |             |
+|    approx_kl            | 0.017024418 |
+|    clip_fraction        | 0.148       |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -0.679      |
+|    explained_variance   | 0.00227     |
+|    learning_rate        | 0.0003      |
+|    loss                 | 0.501       |
+|    n_updates            | 10          |
+|    policy_gradient_loss | -0.0155     |
+|    value_loss           | 18.6        |
+-----------------------------------------
+/usr/local/lib/python3.11/site-packages/stable_baselines3/common/evaluation.py:71: UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+Eval num_timesteps=5000, episode_reward=-401706.12 +/- 0.00
+Episode length: 720.00 +/- 0.00
+------------------------------------------
+| eval/                   |              |
+|    mean_ep_length       | 720          |
+|    mean_reward          | -4.02e+05    |
+| time/                   |              |
+|    total_timesteps      | 5000         |
+| train/                  |              |
+|    approx_kl            | 0.0037117102 |
+|    clip_fraction        | 0            |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -0.679       |
+|    explained_variance   | 0.0574       |
+|    learning_rate        | 0.0003       |
+|    loss                 | 24.9         |
+|    n_updates            | 20           |
+|    policy_gradient_loss | -0.00132     |
+|    value_loss           | 102          |
+------------------------------------------
+New best mean reward!
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 720      |
+|    ep_rew_mean     | -340     |
+| time/              |          |
+|    fps             | 36       |
+|    iterations      | 3        |
+|    time_elapsed    | 167      |
+|    total_timesteps | 6144     |
+---------------------------------
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+---------------------------------------
+| rollout/                |           |
+|    ep_len_mean          | 720       |
+|    ep_rew_mean          | -334      |
+| time/                   |           |
+|    fps                  | 39        |
+|    iterations           | 4         |
+|    time_elapsed         | 208       |
+|    total_timesteps      | 8192      |
+| train/                  |           |
+|    approx_kl            | 0.0164801 |
+|    clip_fraction        | 0.0729    |
+|    clip_range           | 0.2       |
+|    entropy_loss         | -0.67     |
+|    explained_variance   | 0.0386    |
+|    learning_rate        | 0.0003    |
+|    loss                 | 0.901     |
+|    n_updates            | 30        |
+|    policy_gradient_loss | -0.00432  |
+|    value_loss           | 10.1      |
+---------------------------------------
+/usr/local/lib/python3.11/site-packages/stable_baselines3/common/evaluation.py:71: UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+Eval num_timesteps=10000, episode_reward=-401706.12 +/- 0.00
+Episode length: 720.00 +/- 0.00
+-----------------------------------------
+| eval/                   |             |
+|    mean_ep_length       | 720         |
+|    mean_reward          | -4.02e+05   |
+| time/                   |             |
+|    total_timesteps      | 10000       |
+| train/                  |             |
+|    approx_kl            | 0.008781951 |
+|    clip_fraction        | 0.0451      |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -0.63       |
+|    explained_variance   | 0.0376      |
+|    learning_rate        | 0.0003      |
+|    loss                 | 22.7        |
+|    n_updates            | 40          |
+|    policy_gradient_loss | -0.0012     |
+|    value_loss           | 24.3        |
+-----------------------------------------
+ Retrying in 1 seconds
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 720      |
+|    ep_rew_mean     | -330     |
+| time/              |          |
+|    fps             | 34       |
+|    iterations      | 5        |
+|    time_elapsed    | 293      |
+|    total_timesteps | 10240    |
+---------------------------------
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 720          |
+|    ep_rew_mean          | -339         |
+| time/                   |              |
+|    fps                  | 36           |
+|    iterations           | 6            |
+|    time_elapsed         | 338          |
+|    total_timesteps      | 12288        |
+| train/                  |              |
+|    approx_kl            | 0.0032505845 |
+|    clip_fraction        | 0.0267       |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -0.644       |
+|    explained_variance   | 0.0459       |
+|    learning_rate        | 0.0003       |
+|    loss                 | 31.2         |
+|    n_updates            | 50           |
+|    policy_gradient_loss | -0.00349     |
+|    value_loss           | 54           |
+------------------------------------------
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 720          |
+|    ep_rew_mean          | -346         |
+| time/                   |              |
+|    fps                  | 37           |
+|    iterations           | 7            |
+|    time_elapsed         | 378          |
+|    total_timesteps      | 14336        |
+| train/                  |              |
+|    approx_kl            | 0.0031030197 |
+|    clip_fraction        | 0.00171      |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -0.659       |
+|    explained_variance   | 0.0877       |
+|    learning_rate        | 0.0003       |
+|    loss                 | 22.2         |
+|    n_updates            | 60           |
+|    policy_gradient_loss | -0.00117     |
+|    value_loss           | 42.7         |
+------------------------------------------
+/usr/local/lib/python3.11/site-packages/stable_baselines3/common/evaluation.py:71: UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+Eval num_timesteps=15000, episode_reward=-401706.12 +/- 0.00
+Episode length: 720.00 +/- 0.00
+-----------------------------------------
+| eval/                   |             |
+|    mean_ep_length       | 720         |
+|    mean_reward          | -4.02e+05   |
+| time/                   |             |
+|    total_timesteps      | 15000       |
+| train/                  |             |
+|    approx_kl            | 0.011173246 |
+|    clip_fraction        | 0.0391      |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -0.643      |
+|    explained_variance   | 0.142       |
+|    learning_rate        | 0.0003      |
+|    loss                 | 52.2        |
+|    n_updates            | 70          |
+|    policy_gradient_loss | -0.00197    |
+|    value_loss           | 77          |
+-----------------------------------------
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 720      |
+|    ep_rew_mean     | -352     |
+| time/              |          |
+|    fps             | 35       |
+|    iterations      | 8        |
+|    time_elapsed    | 462      |
+|    total_timesteps | 16384    |
+---------------------------------
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 720          |
+|    ep_rew_mean          | -345         |
+| time/                   |              |
+|    fps                  | 36           |
+|    iterations           | 9            |
+|    time_elapsed         | 504          |
+|    total_timesteps      | 18432        |
+| train/                  |              |
+|    approx_kl            | 0.0025463144 |
+|    clip_fraction        | 0.0127       |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -0.625       |
+|    explained_variance   | 0.179        |
+|    learning_rate        | 0.0003       |
+|    loss                 | 29.2         |
+|    n_updates            | 80           |
+|    policy_gradient_loss | -0.00046     |
+|    value_loss           | 88.5         |
+------------------------------------------
+/usr/local/lib/python3.11/site-packages/stable_baselines3/common/evaluation.py:71: UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+ Retrying in 1 seconds
+Eval num_timesteps=20000, episode_reward=-401706.12 +/- 0.00
+Episode length: 720.00 +/- 0.00
+------------------------------------------
+| eval/                   |              |
+|    mean_ep_length       | 720          |
+|    mean_reward          | -4.02e+05    |
+| time/                   |              |
+|    total_timesteps      | 20000        |
+| train/                  |              |
+|    approx_kl            | 0.0020731864 |
+|    clip_fraction        | 0.0168       |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -0.606       |
+|    explained_variance   | -0.0849      |
+|    learning_rate        | 0.0003       |
+|    loss                 | 7.76         |
+|    n_updates            | 90           |
+|    policy_gradient_loss | -0.00177     |
+|    value_loss           | 14.1         |
+------------------------------------------
+ Retrying in 1 seconds
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 720      |
+|    ep_rew_mean     | -341     |
+| time/              |          |
+|    fps             | 34       |
+|    iterations      | 10       |
+|    time_elapsed    | 588      |
+|    total_timesteps | 20480    |
+---------------------------------
+  -> Evaluating PPO_seed7
+ Retrying in 1 seconds
+     [Result] Reward: -401706.12 | Avg Wait: 10.18s | Avg Total Q: 52.16 | Throughput: 2573 | Backlog: 3278
+     [Emergency] Avg Transit: 245.0s | Avg Max Stop: 65.0s
+     [Policy] fraction of switch actions: 1.00
+     [Actions] requested switches: 672 | masked: 504 | executed switches: 168
+     [Saved Model] models/PPO_seed7.zip
+
+============================================================
+CAMPAIGN COMPLETE for given args. Data saved to results/sanity_penalty_20k.csv
+============================================================
