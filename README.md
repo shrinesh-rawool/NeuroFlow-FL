@@ -128,7 +128,3 @@ Active development priorities, roughly in order:
 9. **CCTV sensing demo (exploratory)** — small proof-of-concept using sample/public traffic footage to estimate queue length via object detection, feeding the same state format the trained models expect; a supplementary validation, not a full real-world deployment
 
 ---
-
-## Bottom Line
-
-NeuroFlow-FL demonstrates that **deep RL can learn highly effective traffic signal policies from simulation alone**, with PPO proving superior for complex multi-intersection networks. The integration of emergency preemption and federated learning positions the work as a practical foundation for next-generation, privacy-preserving smart traffic systems.
